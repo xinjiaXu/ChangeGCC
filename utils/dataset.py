@@ -11,7 +11,8 @@ import albumentations as alb
 
 
 class ChangeDetectionDataset(Dataset, Sized):
-    def __init__(self, data_path: str, mode: str,) -> None:
+    def __init__(self, data_path: str, mode: str, image_dir_a: str = "A",
+                 image_dir_b: str = "B", label_dir: str = "label") -> None:
         """
         data_path: Folder containing the sub-folders:
             'A' for test images,
@@ -19,14 +20,18 @@ class ChangeDetectionDataset(Dataset, Sized):
             'label' for the gt_masks,
             'list' containing the image list files ("train.txt", "test.txt", "eval.txt").
         """
-        # Store the path data path + mode (train, val, test):
-        self._mode = mode
-        self._A = os.path.join(data_path, "A")
-        self._B = os.path.join(data_path, "B")
-        self._label = os.path.join(data_path, "label")
+        split_path = os.path.join(data_path, mode)
+        if all(os.path.isdir(os.path.join(split_path, folder))
+               for folder in (image_dir_a, image_dir_b, label_dir)):
+            data_path = split_path
+            self._list_images = sorted(os.listdir(os.path.join(data_path, label_dir)))
+        else:
+            self._list_images = self._read_images_list(data_path, mode)
 
-        # In all the dirs, the files share the same names:
-        self._list_images = self._read_images_list(data_path)
+        self._mode = mode
+        self._A = os.path.join(data_path, image_dir_a)
+        self._B = os.path.join(data_path, image_dir_b)
+        self._label = os.path.join(data_path, label_dir)
 
         # Initialize augmentations:
         if mode == 'train' or mode == 'trainval':
@@ -56,8 +61,8 @@ class ChangeDetectionDataset(Dataset, Sized):
     def __len__(self):
         return len(self._list_images)
 
-    def _read_images_list(self, data_path: str) -> List[str]:
-        images_list_file = os.path.join(data_path, 'list', self._mode + ".txt")
+    def _read_images_list(self, data_path: str, mode: str) -> List[str]:
+        images_list_file = os.path.join(data_path, 'list', mode + ".txt")
         with open(images_list_file, "r") as f:
             return f.readlines()
 
