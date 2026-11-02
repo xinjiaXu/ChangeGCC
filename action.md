@@ -31,6 +31,18 @@ bash prepare_server_data.sh /home/xxj/Data
 
 Training requires `ckpt/gcc-b_in1k.pth`. The repository README names this checkpoint but does not give a download URL. Obtain the authors' GCC-B ImageNet-1K weight and place it at that path, or set `PRETRAINED=/path/to/gcc-b_in1k.pth`. The launcher exits if it is missing.
 
+## Model complexity
+
+After activating `changegcc-rs`, count the base model with one paired 256x256 input. FLOPs and parameter counts do not require the GCC-B checkpoint:
+
+```bash
+python -m pip install -r requirements_profile.txt
+CUDA_VISIBLE_DEVICES=0 python profile_model.py --model-size base --device cuda:0 \
+  --output ChangeGCC_work_dirs/profile_256.json
+```
+
+The JSON lists total/trainable parameters, fvcore-counted operations, and unsupported operators. The FLOP total is incomplete if unsupported operators are listed.
+
 ## Train
 
 ```bash
