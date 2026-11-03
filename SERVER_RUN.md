@@ -33,7 +33,7 @@ The command only checks folders. The ChangeGCC loader now supports the existing 
 
 ## Pretrained weights
 
-Training expects `ckpt/gcc-b_in1k.pth` by default. The checked-in README names this file but does not provide a download URL, and the repository contains no checkpoint. Obtain the authors' intended GCC-B ImageNet-1K checkpoint before training, then place it at that path or set `PRETRAINED=/path/to/gcc-b_in1k.pth`. The script stops if it is missing; it will not silently start without the requested initialization.
+Training uses `ckpt/gcc-b_in1k.pth` by default. The checked-in README names this file but does not provide a download URL, and the repository contains no checkpoint. If the authors' intended GCC-B ImageNet-1K checkpoint becomes available, place it at that path or set `PRETRAINED=/path/to/gcc-b_in1k.pth`. To explicitly train from random initialization without the checkpoint, set `PRETRAINED=none`; the architecture and training hyperparameters remain unchanged, but the result is not the pretrained configuration reported by the paper.
 
 The README also shows a benchmark checkpoint named `ckpt/changegcc-b_levir.pth`, but gives no download URL. For testing, pass an available checkpoint explicitly.
 

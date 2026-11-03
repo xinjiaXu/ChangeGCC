@@ -7,6 +7,7 @@ gpu_ids="${GPU_IDS:-0}"
 devices="${DEVICES:-1}"
 num_workers="${NUM_WORKERS:-8}"
 pretrained="${PRETRAINED:-$repo_root/ckpt/gcc-b_in1k.pth}"
+train_from_scratch=0
 
 if [[ $# -ne 1 ]]; then
   printf 'Usage: %s {levircd|levircdplus|cdd|whucd|sysucd}\n' "$0" >&2
@@ -31,7 +32,9 @@ for split in train val; do
   done
 done
 
-if [[ ! -f "$pretrained" ]]; then
+if [[ "$pretrained" == "none" ]]; then
+  train_from_scratch=1
+elif [[ ! -f "$pretrained" ]]; then
   printf 'ChangeGCC-B pretrained checkpoint not found: %s\n' "$pretrained" >&2
   printf 'The repository README does not provide a download URL for gcc-b_in1k.pth. Set PRETRAINED after obtaining the official checkpoint.\n' >&2
   exit 1
@@ -39,13 +42,20 @@ fi
 
 cd "$repo_root"
 export CUDA_VISIBLE_DEVICES="$gpu_ids"
-python train.py \
+train_args=( \
   --dataset "$dataset" \
   --data_dir "$dataset_root" \
   --image_dir_a "$image_a" \
   --image_dir_b "$image_b" \
   --label_dir "$label_dir" \
-  --pretrain_dir "$pretrained" \
   --output_dir "$repo_root/ChangeGCC_work_dirs/$1" \
   --devices "$devices" \
-  --num_workers "$num_workers"
+  --num_workers "$num_workers" \
+)
+if [[ "$train_from_scratch" -eq 1 ]]; then
+  train_args+=(--no-pretrained)
+  printf 'Training from scratch: GCC-B ImageNet checkpoint loading is disabled.\n'
+else
+  train_args+=(--pretrain_dir "$pretrained")
+fi
+python train.py "${train_args[@]}"

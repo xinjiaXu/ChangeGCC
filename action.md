@@ -29,7 +29,7 @@ conda activate changegcc-rs
 bash prepare_server_data.sh /home/xxj/Data
 ```
 
-Training requires `ckpt/gcc-b_in1k.pth`. The repository README names this checkpoint but does not give a download URL. Obtain the authors' GCC-B ImageNet-1K weight and place it at that path, or set `PRETRAINED=/path/to/gcc-b_in1k.pth`. The launcher exits if it is missing.
+Training uses `ckpt/gcc-b_in1k.pth` by default. The repository README names it but does not give a download URL. If you obtain the authors' GCC-B ImageNet-1K checkpoint, place it at that path or set `PRETRAINED=/path/to/gcc-b_in1k.pth`. To train from random initialization without it, prefix the command with `PRETRAINED=none`. This is a scratch-trained ChangeGCC-B result, not the pretrained configuration reported by the paper.
 
 ## Model complexity
 
@@ -51,6 +51,12 @@ bash run_train.sh levircdplus
 bash run_train.sh cdd
 bash run_train.sh whucd
 bash run_train.sh sysucd
+```
+
+For example, train CDD from scratch on GPU 1:
+
+```bash
+PRETRAINED=none GPU_IDS=1 NUM_WORKERS=4 bash run_train.sh cdd
 ```
 
 Defaults: base model, batch 32, 200 epochs, Adam, lr `1e-5`, cosine scheduler, 20 warmup epochs, weight decay `1e-4`. For GPU 1 use `GPU_IDS=1`; for both use `GPU_IDS=0,1 DEVICES=2`.

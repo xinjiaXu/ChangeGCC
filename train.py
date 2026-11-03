@@ -19,6 +19,8 @@ def parse_option():
     parser.add_argument('--image_dir_b', type=str, default='B')
     parser.add_argument('--label_dir', type=str, default='label')
     parser.add_argument('--pretrain_dir', type=str, default='ckpt/gcc-b_in1k.pth')
+    parser.add_argument('--no-pretrained', action='store_true',
+                        help='train the GCC-B model from random initialization')
     parser.add_argument('--output_dir', type=str, default='./output', help='output director')
     # model
     parser.add_argument('--model_size', type=str, default="base")
@@ -58,7 +60,9 @@ def build_loader(opt):
 
 def build_model(opt):
     model = ChangeGCC(size=opt.model_size)
-    if opt.pretrain_dir is not None:
+    if opt.no_pretrained:
+        print('Training ChangeGCC from random initialization; no encoder checkpoint loaded.')
+    elif opt.pretrain_dir is not None:
         pretrained_dict = torch.load(opt.pretrain_dir)
         model_dict = model.state_dict()
         load_key, no_load_key, temp_dict = [], [], {}
