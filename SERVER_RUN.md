@@ -1,6 +1,6 @@
 # ChangeGCC server setup
 
-The adapters read `/home/xxj/Data` directly. They do not copy images or create dataset replicas. Model outputs are kept under `ChangeGCC_work_dirs/<dataset>/`.
+The adapters read `/home/xxj/Data` directly. They do not copy images or create dataset replicas. Model outputs are kept under `ChangeGCC_work_dirs/<DatasetName>/ChangeGCC-b/` (for example, CDD uses `ChangeGCC_work_dirs/CDD/ChangeGCC-b/`).
 
 ## Environment
 
@@ -47,14 +47,14 @@ bash run_train.sh whucd
 bash run_train.sh sysucd
 ```
 
-The wrapper preserves code defaults: base model, batch size 32, 200 epochs, Adam, learning rate `1e-5`, cosine schedule, 20 warmup epochs, and weight decay `1e-4`. The WHU validation loader uses batch size 4 in the upstream code. Runtime settings default to one visible GPU and 8 workers; select GPU 1 with `GPU_IDS=1`, or both GPUs with `GPU_IDS=0,1 DEVICES=2`.
+The wrapper preserves code defaults: base model, batch size 32, 200 epochs, Adam, learning rate `1e-5`, cosine schedule, 20 warmup epochs, and weight decay `1e-4`. The WHU validation loader uses batch size 4 in the upstream code. Runtime settings default to one visible GPU and 8 workers; select GPU 1 with `GPU_IDS=1`, or both GPUs with `GPU_IDS=0,1 DEVICES=2`. Set `BATCH_SIZE=8` or `BATCH_SIZE=4` if GPU memory is insufficient; the default remains 32.
 
-Checkpoints, `res.out`, and the per-epoch XLSX logs are written below `ChangeGCC_work_dirs/<dataset>/`. The training code saves `last.pth` every epoch and `EpochN.pth` from epoch 30 onward; it does not select or save a best-validation checkpoint.
+Checkpoints, `res.out`, and per-epoch XLSX logs are written below `ChangeGCC_work_dirs/<DatasetName>/ChangeGCC-b/`. The training code saves `last.pth` every epoch and `EpochN.pth` from epoch 30 onward; it does not select or save a best-validation checkpoint.
 
 ## Test
 
 ```bash
-bash run_test.sh levircd ChangeGCC_work_dirs/levircd/LEVIR/ChangeGCC-b/last.pth
+bash run_test.sh levircd ChangeGCC_work_dirs/LEVIR/ChangeGCC-b/last.pth
 ```
 
 Replace the dataset key and checkpoint path as needed. Test inference uses batch size 1 and reports the repository's binary segmentation metrics.

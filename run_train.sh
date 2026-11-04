@@ -6,6 +6,7 @@ data_root="${DATA_ROOT:-/home/xxj/Data}"
 gpu_ids="${GPU_IDS:-0}"
 devices="${DEVICES:-1}"
 num_workers="${NUM_WORKERS:-8}"
+batch_size="${BATCH_SIZE:-32}"
 pretrained="${PRETRAINED:-$repo_root/ckpt/gcc-b_in1k.pth}"
 train_from_scratch=0
 
@@ -48,7 +49,8 @@ train_args=( \
   --image_dir_a "$image_a" \
   --image_dir_b "$image_b" \
   --label_dir "$label_dir" \
-  --output_dir "$repo_root/ChangeGCC_work_dirs/$1" \
+  --output_dir "$repo_root/ChangeGCC_work_dirs" \
+  --batch_size "$batch_size" \
   --devices "$devices" \
   --num_workers "$num_workers" \
 )

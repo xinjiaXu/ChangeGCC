@@ -59,6 +59,8 @@ For example, train CDD from scratch on GPU 1:
 PRETRAINED=none GPU_IDS=1 NUM_WORKERS=4 bash run_train.sh cdd
 ```
 
+If GPU memory is insufficient, lower only the batch size, for example `BATCH_SIZE=8` or `BATCH_SIZE=4`. The default remains 32. Training output paths are `ChangeGCC_work_dirs/<DatasetName>/ChangeGCC-b/`; for CDD this is `ChangeGCC_work_dirs/CDD/ChangeGCC-b/`.
+
 Defaults: base model, batch 32, 200 epochs, Adam, lr `1e-5`, cosine scheduler, 20 warmup epochs, weight decay `1e-4`. For GPU 1 use `GPU_IDS=1`; for both use `GPU_IDS=0,1 DEVICES=2`.
 
 ## Test
@@ -66,11 +68,11 @@ Defaults: base model, batch 32, 200 epochs, Adam, lr `1e-5`, cosine scheduler, 2
 Training saves `last.pth` each epoch. Pass the corresponding checkpoint to the test launcher:
 
 ```bash
-bash run_test.sh levircd ChangeGCC_work_dirs/levircd/LEVIR/ChangeGCC-b/last.pth
-bash run_test.sh levircdplus ChangeGCC_work_dirs/levircdplus/LEVIR+/ChangeGCC-b/last.pth
-bash run_test.sh cdd ChangeGCC_work_dirs/cdd/CDD/ChangeGCC-b/last.pth
-bash run_test.sh whucd ChangeGCC_work_dirs/whucd/WHU/ChangeGCC-b/last.pth
-bash run_test.sh sysucd ChangeGCC_work_dirs/sysucd/SYSU/ChangeGCC-b/last.pth
+bash run_test.sh levircd ChangeGCC_work_dirs/LEVIR/ChangeGCC-b/last.pth
+bash run_test.sh levircdplus ChangeGCC_work_dirs/LEVIR+/ChangeGCC-b/last.pth
+bash run_test.sh cdd ChangeGCC_work_dirs/CDD/ChangeGCC-b/last.pth
+bash run_test.sh whucd ChangeGCC_work_dirs/WHU/ChangeGCC-b/last.pth
+bash run_test.sh sysucd ChangeGCC_work_dirs/SYSU/ChangeGCC-b/last.pth
 ```
 
-Evaluation uses batch size 1 and prints the model's binary change metrics. Outputs and XLSX logs are under `ChangeGCC_work_dirs/<dataset>/`.
+Evaluation uses batch size 1 and prints the model's binary change metrics. Outputs and XLSX logs are under `ChangeGCC_work_dirs/<DatasetName>/ChangeGCC-b/`.
