@@ -49,7 +49,7 @@ bash run_train.sh sysucd
 
 The wrapper preserves code defaults: base model, batch size 32, 200 epochs, Adam, learning rate `1e-5`, cosine schedule, 20 warmup epochs, and weight decay `1e-4`. The WHU validation loader uses batch size 4 in the upstream code. Runtime settings default to one visible GPU and 8 workers; select GPU 1 with `GPU_IDS=1`, or both GPUs with `GPU_IDS=0,1 DEVICES=2`. Set `BATCH_SIZE=8` or `BATCH_SIZE=4` if GPU memory is insufficient; the default remains 32.
 
-Checkpoints, `res.out`, and per-epoch XLSX logs are written below `ChangeGCC_work_dirs/<DatasetName>/ChangeGCC-b/`. The training code saves `last.pth` every epoch and `EpochN.pth` from epoch 30 onward; it does not select or save a best-validation checkpoint.
+Checkpoints, `res.out`, and per-epoch XLSX logs are written below `ChangeGCC_work_dirs/<DatasetName>/ChangeGCC-b/`. The training code overwrites `last.pth` every epoch and saves numbered snapshots from epoch 30 onward. It keeps the two newest numbered snapshots plus `last.pth`, at most three weight files; it does not select or save a best-validation checkpoint.
 
 ## Test
 

@@ -1,4 +1,4 @@
-import argparse, os, sys, time, warnings, xlsxwriter
+import argparse, os, re, sys, time, warnings, xlsxwriter
 import multiprocessing as mproc
 import numpy as np
 import torch
@@ -79,6 +79,17 @@ def build_model(opt):
     return model
 
 
+def prune_epoch_checkpoints(output_dir, keep=2):
+    epoch_checkpoints = []
+    for filename in os.listdir(output_dir):
+        match = re.fullmatch(r'Epoch(\d+)\.pth', filename)
+        if match:
+            epoch_checkpoints.append((int(match.group(1)), os.path.join(output_dir, filename)))
+    epoch_checkpoints.sort(reverse=True)
+    for _, checkpoint_path in epoch_checkpoints[keep:]:
+        os.remove(checkpoint_path)
+
+
 def main(opt):
     train_loader, val_loader = build_loader(opt)
     print(f"Length of training dataset: {len(train_loader.dataset)}")
@@ -133,8 +144,10 @@ def main(opt):
         torch.save(model.state_dict(), os.path.join(opt.output_dir, "last.pth"))
         print("Model saved: {}!".format(os.path.join(opt.output_dir, "last.pth")))
         if (epoch >= 30) & (epoch % 1 == 0):
-            torch.save(model.state_dict(), os.path.join(opt.output_dir, f"Epoch{epoch}.pth"))
-            print("Model saved: {}!".format(os.path.join(opt.output_dir, f"Epoch{epoch}.pth")))
+            epoch_checkpoint = os.path.join(opt.output_dir, f"Epoch{epoch}.pth")
+            torch.save(model.state_dict(), epoch_checkpoint)
+            print("Model saved: {}!".format(epoch_checkpoint))
+            prune_epoch_checkpoints(opt.output_dir, keep=2)
         row = row + 1
     train_hook.close()
     val_hook.close()

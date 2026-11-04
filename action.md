@@ -65,7 +65,7 @@ Defaults: base model, batch 32, 200 epochs, Adam, lr `1e-5`, cosine scheduler, 2
 
 ## Test
 
-Training saves `last.pth` each epoch. Pass the corresponding checkpoint to the test launcher:
+Training overwrites `last.pth` every epoch and saves numbered snapshots from epoch 30 onward. It keeps only the two newest numbered snapshots alongside `last.pth`, for a maximum of three weight files in the run directory. Pass `last.pth` to the test launcher:
 
 ```bash
 bash run_test.sh levircd ChangeGCC_work_dirs/LEVIR/ChangeGCC-b/last.pth
