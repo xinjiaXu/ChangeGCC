@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 data_root="${DATA_ROOT:-/home/xxj/Data}"
+levircd_root="${LEVIRCD_ROOT:-$data_root/LEVIR_CD}"
 gpu_ids="${GPU_IDS:-0}"
 devices="${DEVICES:-1}"
 num_workers="${NUM_WORKERS:-8}"
@@ -16,7 +17,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 case "$1" in
-  levircd) dataset="LEVIR"; dataset_root="$data_root/LEVIR_CD"; image_a="A"; image_b="B"; label_dir="label" ;;
+  levircd) dataset="LEVIR"; dataset_root="$levircd_root"; image_a="A"; image_b="B"; label_dir="label" ;;
   levircdplus) dataset="LEVIR+"; dataset_root="$data_root/LEVIR_CD_PLUS/cut_data"; image_a="A"; image_b="B"; label_dir="label" ;;
   cdd) dataset="CDD"; dataset_root="$data_root/CDD"; image_a="A"; image_b="B"; label_dir="OUT" ;;
   whucd) dataset="WHU"; dataset_root="$data_root/WHUCD"; image_a="A"; image_b="B"; label_dir="label" ;;

@@ -41,6 +41,8 @@ python prepare_levir_patches.py
 
 By default, patches are written to `/home/xxj/Data/ChangeGCC_data/LEVIR_CD`, preserving `train`, `val`, and `test` splits. Override `--source` or `--output` if your paths differ. After verifying the patch sizes and counts, use `DATA_ROOT=/home/xxj/Data/ChangeGCC_data` for LEVIR-CD commands so the existing launcher selects the cropped copy.
 
+If a 256x256 LEVIR-CD copy already exists (for example, under `/home/xxj/Data/LEVIR_CD/cut_data`), use it directly instead of creating another copy. Set `LEVIRCD_ROOT` to the directory containing `train`, `val`, and `test`; the launcher checks the expected `A`, `B`, and `label` directories.
+
 Training uses `ckpt/gcc-b_in1k.pth` by default. The repository README names it but does not give a download URL. If you obtain the authors' GCC-B ImageNet-1K checkpoint, place it at that path or set `PRETRAINED=/path/to/gcc-b_in1k.pth`. To train from random initialization without it, prefix the command with `PRETRAINED=none`. This is a scratch-trained ChangeGCC-B result, not the pretrained configuration reported by the paper.
 
 ## Model complexity
@@ -78,6 +80,13 @@ DATA_ROOT=/home/xxj/Data/ChangeGCC_data PRETRAINED=none GPU_IDS=1 DEVICES=1 \
   NUM_WORKERS=4 BATCH_SIZE=2 bash run_train.sh levircd
 ```
 
+For an existing cropped dataset at `/home/xxj/Data/LEVIR_CD/cut_data`, use:
+
+```bash
+LEVIRCD_ROOT=/home/xxj/Data/LEVIR_CD/cut_data PRETRAINED=none \
+  GPU_IDS=1 DEVICES=1 NUM_WORKERS=4 BATCH_SIZE=2 bash run_train.sh levircd
+```
+
 If GPU memory is insufficient, lower only the batch size, for example `BATCH_SIZE=8` or `BATCH_SIZE=4`. The default remains 32. Training output paths are `ChangeGCC_work_dirs/<DatasetName>/ChangeGCC-b/`; for CDD this is `ChangeGCC_work_dirs/CDD/ChangeGCC-b/`.
 
 Defaults: base model, batch 32, 200 epochs, Adam, lr `1e-5`, cosine scheduler, 20 warmup epochs, weight decay `1e-4`. For GPU 1 use `GPU_IDS=1`; for both use `GPU_IDS=0,1 DEVICES=2`.
@@ -98,6 +107,13 @@ For the cropped LEVIR-CD copy, set the same `DATA_ROOT`:
 
 ```bash
 DATA_ROOT=/home/xxj/Data/ChangeGCC_data GPU_IDS=1 NUM_WORKERS=4 \
+  bash run_test.sh levircd ChangeGCC_work_dirs/LEVIR/ChangeGCC-b/last.pth
+```
+
+For an existing cropped dataset, point `LEVIRCD_ROOT` to its root:
+
+```bash
+LEVIRCD_ROOT=/home/xxj/Data/LEVIR_CD/cut_data GPU_IDS=1 NUM_WORKERS=4 \
   bash run_test.sh levircd ChangeGCC_work_dirs/LEVIR/ChangeGCC-b/last.pth
 ```
 
