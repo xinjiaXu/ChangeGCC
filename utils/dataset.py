@@ -12,7 +12,7 @@ import albumentations as alb
 
 class ChangeDetectionDataset(Dataset, Sized):
     def __init__(self, data_path: str, mode: str, image_dir_a: str = "A",
-                 image_dir_b: str = "B", label_dir: str = "label") -> None:
+                 image_dir_b: str = "B", label_dir: str = "label", patch_size: int = 0) -> None:
         """
         data_path: Folder containing the sub-folders:
             'A' for test images,
@@ -32,6 +32,30 @@ class ChangeDetectionDataset(Dataset, Sized):
         self._A = os.path.join(data_path, image_dir_a)
         self._B = os.path.join(data_path, image_dir_b)
         self._label = os.path.join(data_path, label_dir)
+        self._patch_size = patch_size
+        if patch_size < 0:
+            raise ValueError("patch_size must be zero (disabled) or a positive integer")
+
+        self._samples = []
+        for raw_name in self._list_images:
+            img_name = raw_name.strip('\n')
+            if patch_size == 0:
+                self._samples.append((img_name, None, None))
+                continue
+
+            label_path = os.path.join(self._label, img_name)
+            label = cv2.imread(label_path, cv2.IMREAD_UNCHANGED)
+            if label is None:
+                raise ValueError(f"Could not read label: {label_path}")
+            height, width = label.shape[:2]
+            if height % patch_size or width % patch_size:
+                raise ValueError(
+                    f"{label_path} has size {width}x{height}, which is not divisible "
+                    f"by patch_size={patch_size}"
+                )
+            for top in range(0, height, patch_size):
+                for left in range(0, width, patch_size):
+                    self._samples.append((img_name, top, left))
 
         # Initialize augmentations:
         if mode == 'train' or mode == 'trainval':
@@ -43,12 +67,30 @@ class ChangeDetectionDataset(Dataset, Sized):
 
     def __getitem__(self, idx):
         # Current image set name:
-        img_name = self._list_images[idx].strip('\n')
+        img_name, top, left = self._samples[idx]
 
         # Loading the images:
-        x_ref = cv2.cvtColor(cv2.imread(os.path.join(self._A, img_name)), cv2.COLOR_BGR2RGB) / 255
-        x_test = cv2.cvtColor(cv2.imread(os.path.join(self._B, img_name)), cv2.COLOR_BGR2RGB) / 255
-        x_mask = _binarize(cv2.imread(os.path.join(self._label, img_name))[:, :, 0] / 255)
+        image_a = cv2.imread(os.path.join(self._A, img_name))
+        image_b = cv2.imread(os.path.join(self._B, img_name))
+        label = cv2.imread(os.path.join(self._label, img_name), cv2.IMREAD_UNCHANGED)
+        if image_a is None or image_b is None or label is None:
+            raise ValueError(f"Could not read paired data for {img_name}")
+        if image_a.shape[:2] != image_b.shape[:2] or image_a.shape[:2] != label.shape[:2]:
+            raise ValueError(
+                f"Spatial dimensions differ for {img_name}: "
+                f"A={image_a.shape}, B={image_b.shape}, label={label.shape}"
+            )
+
+        if top is not None:
+            size = self._patch_size
+            bottom, right = top + size, left + size
+            image_a = image_a[top:bottom, left:right]
+            image_b = image_b[top:bottom, left:right]
+            label = label[top:bottom, left:right]
+
+        x_ref = cv2.cvtColor(image_a, cv2.COLOR_BGR2RGB) / 255
+        x_test = cv2.cvtColor(image_b, cv2.COLOR_BGR2RGB) / 255
+        x_mask = _binarize(label[:, :, 0] / 255 if label.ndim == 3 else label / 255)
 
         # Data augmentation in case of training:
         if self._mode == 'train' or self._mode == 'trainval':
@@ -59,7 +101,7 @@ class ChangeDetectionDataset(Dataset, Sized):
         return x_ref, x_test, x_mask
 
     def __len__(self):
-        return len(self._list_images)
+        return len(self._samples)
 
     def _read_images_list(self, data_path: str, mode: str) -> List[str]:
         images_list_file = os.path.join(data_path, 'list', mode + ".txt")

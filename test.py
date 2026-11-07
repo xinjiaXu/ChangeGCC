@@ -15,13 +15,16 @@ parser.add_argument('--data_path', type=str, default='data/LEVIR/ABLabel')
 parser.add_argument('--image_dir_a', type=str, default='A')
 parser.add_argument('--image_dir_b', type=str, default='B')
 parser.add_argument('--label_dir', type=str, default='label')
+parser.add_argument('--patch_size', type=int, default=0,
+                    help='tile paired images and labels into square patches on read; 0 disables tiling')
 parser.add_argument('--num_workers', type=int, default=0)
 # model
 parser.add_argument('--model_size', type=str, default="base")
 opt = parser.parse_args()
 
 test_data = ChangeDetectionDataset(
-    opt.data_path, "test", opt.image_dir_a, opt.image_dir_b, opt.label_dir
+    opt.data_path, "test", opt.image_dir_a, opt.image_dir_b, opt.label_dir,
+    patch_size=opt.patch_size
 )
 test_loader = DataLoader(test_data, batch_size=1, shuffle=False, num_workers=opt.num_workers)
 model = ChangeGCC(size=opt.model_size)

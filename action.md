@@ -29,19 +29,15 @@ conda activate changegcc-rs
 bash prepare_server_data.sh /home/xxj/Data
 ```
 
-## Prepare raw 1024x1024 LEVIR-CD
+## LEVIR-CD input handling
 
-The upstream ChangeGCC README requires LEVIR images and masks to be cropped into aligned 256x256 patches before training or evaluation. If `/home/xxj/Data/LEVIR_CD` contains the original 1024x1024 images, create a separate cropped copy; the script never modifies its source directory:
+The upstream README specifies 256x256 LEVIR patches. The LEVIR-CD launcher now applies the same non-overlapping 256x256 tiling in the dataset loader, so raw 1024x1024 images are read as 16 aligned image/mask patches without writing a second dataset. The original files stay unchanged. A dataset already divided into 256x256 patches also works; each file becomes one sample. To use a dataset outside `/home/xxj/Data/LEVIR_CD`, set `LEVIRCD_ROOT` to the directory containing `train`, `val`, and `test`, each with `A`, `B`, and `label` folders.
+
+An optional offline equivalent is available if you need patch files for another tool. It writes a separate copy and does not modify the source:
 
 ```bash
-cd /home/xxj/code/DINOCLIP_comparative_test/ChangeGCC
-conda activate changegcc-rs
 python prepare_levir_patches.py
 ```
-
-By default, patches are written to `/home/xxj/Data/ChangeGCC_data/LEVIR_CD`, preserving `train`, `val`, and `test` splits. Override `--source` or `--output` if your paths differ. After verifying the patch sizes and counts, use `DATA_ROOT=/home/xxj/Data/ChangeGCC_data` for LEVIR-CD commands so the existing launcher selects the cropped copy.
-
-If a 256x256 LEVIR-CD copy already exists (for example, under `/home/xxj/Data/LEVIR_CD/cut_data`), use it directly instead of creating another copy. Set `LEVIRCD_ROOT` to the directory containing `train`, `val`, and `test`; the launcher checks the expected `A`, `B`, and `label` directories.
 
 Training uses `ckpt/gcc-b_in1k.pth` by default. The repository README names it but does not give a download URL. If you obtain the authors' GCC-B ImageNet-1K checkpoint, place it at that path or set `PRETRAINED=/path/to/gcc-b_in1k.pth`. To train from random initialization without it, prefix the command with `PRETRAINED=none`. This is a scratch-trained ChangeGCC-B result, not the pretrained configuration reported by the paper.
 
@@ -73,14 +69,14 @@ For example, train CDD from scratch on GPU 1:
 PRETRAINED=none GPU_IDS=1 NUM_WORKERS=4 bash run_train.sh cdd
 ```
 
-Train LEVIR-CD from scratch using the 256x256 patches above:
+Train directly from the original LEVIR-CD images. The loader tiles them on read:
 
 ```bash
-DATA_ROOT=/home/xxj/Data/ChangeGCC_data PRETRAINED=none GPU_IDS=1 DEVICES=1 \
+PRETRAINED=none GPU_IDS=1 DEVICES=1 \
   NUM_WORKERS=4 BATCH_SIZE=2 bash run_train.sh levircd
 ```
 
-For an existing cropped dataset at `/home/xxj/Data/LEVIR_CD/cut_data`, use:
+For an existing 256x256 dataset at `/home/xxj/Data/LEVIR_CD/cut_data`, use:
 
 ```bash
 LEVIRCD_ROOT=/home/xxj/Data/LEVIR_CD/cut_data PRETRAINED=none \
@@ -103,10 +99,10 @@ bash run_test.sh whucd ChangeGCC_work_dirs/WHU/ChangeGCC-b/last.pth
 bash run_test.sh sysucd ChangeGCC_work_dirs/SYSU/ChangeGCC-b/last.pth
 ```
 
-For the cropped LEVIR-CD copy, set the same `DATA_ROOT`:
+For raw LEVIR-CD, test evaluation tiles each 1024x1024 source into aligned 256x256 patches and accumulates metrics over all patches:
 
 ```bash
-DATA_ROOT=/home/xxj/Data/ChangeGCC_data GPU_IDS=1 NUM_WORKERS=4 \
+GPU_IDS=1 NUM_WORKERS=4 \
   bash run_test.sh levircd ChangeGCC_work_dirs/LEVIR/ChangeGCC-b/last.pth
 ```
 

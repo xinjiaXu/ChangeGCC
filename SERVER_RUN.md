@@ -23,6 +23,8 @@ bash prepare_server_data.sh /home/xxj/Data
 
 The command only checks folders. The ChangeGCC loader now supports the existing split layout and reads filenames from each split's label directory, so the original `list/*.txt` files are not required for these datasets. The original flat `A/B/label/list` layout remains supported.
 
+For `levircd`, the launcher tiles inputs into aligned 256x256 patches while reading. This matches the upstream LEVIR preprocessing while leaving raw 1024x1024 files untouched. If using an alternate LEVIR directory, set `LEVIRCD_ROOT` to its split-root path. Other dataset launchers do not enable tiling.
+
 | Key | Dataset root | T1 | T2 | Mask |
 | --- | --- | --- | --- | --- |
 | `levircd` | `/home/xxj/Data/LEVIR_CD` | `A` | `B` | `label` |

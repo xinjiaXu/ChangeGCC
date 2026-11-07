@@ -10,6 +10,7 @@ num_workers="${NUM_WORKERS:-8}"
 batch_size="${BATCH_SIZE:-32}"
 pretrained="${PRETRAINED:-$repo_root/ckpt/gcc-b_in1k.pth}"
 train_from_scratch=0
+patch_size=0
 
 if [[ $# -ne 1 ]]; then
   printf 'Usage: %s {levircd|levircdplus|cdd|whucd|sysucd}\n' "$0" >&2
@@ -17,7 +18,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 case "$1" in
-  levircd) dataset="LEVIR"; dataset_root="$levircd_root"; image_a="A"; image_b="B"; label_dir="label" ;;
+  levircd) dataset="LEVIR"; dataset_root="$levircd_root"; image_a="A"; image_b="B"; label_dir="label"; patch_size=256 ;;
   levircdplus) dataset="LEVIR+"; dataset_root="$data_root/LEVIR_CD_PLUS/cut_data"; image_a="A"; image_b="B"; label_dir="label" ;;
   cdd) dataset="CDD"; dataset_root="$data_root/CDD"; image_a="A"; image_b="B"; label_dir="OUT" ;;
   whucd) dataset="WHU"; dataset_root="$data_root/WHUCD"; image_a="A"; image_b="B"; label_dir="label" ;;
@@ -50,6 +51,7 @@ train_args=( \
   --image_dir_a "$image_a" \
   --image_dir_b "$image_b" \
   --label_dir "$label_dir" \
+  --patch_size "$patch_size" \
   --output_dir "$repo_root/ChangeGCC_work_dirs" \
   --batch_size "$batch_size" \
   --devices "$devices" \

@@ -18,6 +18,8 @@ def parse_option():
     parser.add_argument('--image_dir_a', type=str, default='A')
     parser.add_argument('--image_dir_b', type=str, default='B')
     parser.add_argument('--label_dir', type=str, default='label')
+    parser.add_argument('--patch_size', type=int, default=0,
+                        help='tile paired images and labels into square patches on read; 0 disables tiling')
     parser.add_argument('--pretrain_dir', type=str, default='ckpt/gcc-b_in1k.pth')
     parser.add_argument('--no-pretrained', action='store_true',
                         help='train the GCC-B model from random initialization')
@@ -49,10 +51,12 @@ def parse_option():
 
 
 def build_loader(opt):
-    train_data = ChangeDetectionDataset(opt.data_dir, "train", opt.image_dir_a, opt.image_dir_b, opt.label_dir)
+    train_data = ChangeDetectionDataset(opt.data_dir, "train", opt.image_dir_a, opt.image_dir_b,
+                                        opt.label_dir, patch_size=opt.patch_size)
     train_loader = DataLoader(train_data, batch_size=opt.batch_size, shuffle=True, num_workers=opt.num_workers,
                               pin_memory=True, drop_last=True)
-    val_data = ChangeDetectionDataset(opt.data_dir, "val", opt.image_dir_a, opt.image_dir_b, opt.label_dir)
+    val_data = ChangeDetectionDataset(opt.data_dir, "val", opt.image_dir_a, opt.image_dir_b,
+                                      opt.label_dir, patch_size=opt.patch_size)
     val_loader = DataLoader(val_data, batch_size=opt.batch_size if opt.dataset != "WHU" else 4, shuffle=False,
                             num_workers=opt.num_workers, pin_memory=True, drop_last=True)
     return train_loader, val_loader
