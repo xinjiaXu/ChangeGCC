@@ -31,7 +31,7 @@ bash prepare_server_data.sh /home/xxj/Data
 
 ## LEVIR-CD input handling
 
-The upstream README specifies 256x256 LEVIR patches. The LEVIR-CD launcher now applies the same non-overlapping 256x256 tiling in the dataset loader, so raw 1024x1024 images are read as 16 aligned image/mask patches without writing a second dataset. The original files stay unchanged. A dataset already divided into 256x256 patches also works; each file becomes one sample. To use a dataset outside `/home/xxj/Data/LEVIR_CD`, set `LEVIRCD_ROOT` to the directory containing `train`, `val`, and `test`, each with `A`, `B`, and `label` folders.
+The upstream README specifies 256x256 LEVIR patches. The `levircd` and `levircdplus` launchers apply non-overlapping 256x256 tiling in the dataset loader, so raw 1024x1024 images are read as 16 aligned image/mask patches without writing a second dataset. The original files stay unchanged. Data already divided into 256x256 patches also works; each file becomes one sample. For LEVIR-CD outside `/home/xxj/Data/LEVIR_CD`, set `LEVIRCD_ROOT` to the directory containing `train`, `val`, and `test`, each with `A`, `B`, and `label` folders.
 
 An optional offline equivalent is available if you need patch files for another tool. It writes a separate copy and does not modify the source:
 
@@ -76,6 +76,13 @@ PRETRAINED=none GPU_IDS=1 DEVICES=1 \
   NUM_WORKERS=4 BATCH_SIZE=2 bash run_train.sh levircd
 ```
 
+LEVIR-CD-PLUS uses the same on-the-fly tiling with the existing `cut_data` root:
+
+```bash
+PRETRAINED=none GPU_IDS=1 DEVICES=1 NUM_WORKERS=4 BATCH_SIZE=2 \
+  bash run_train.sh levircdplus
+```
+
 For an existing 256x256 dataset at `/home/xxj/Data/LEVIR_CD/cut_data`, use:
 
 ```bash
@@ -104,6 +111,13 @@ For raw LEVIR-CD, test evaluation tiles each 1024x1024 source into aligned 256x2
 ```bash
 GPU_IDS=1 NUM_WORKERS=4 \
   bash run_test.sh levircd ChangeGCC_work_dirs/LEVIR/ChangeGCC-b/last.pth
+```
+
+Evaluate LEVIR-CD-PLUS using the same model behavior:
+
+```bash
+GPU_IDS=1 NUM_WORKERS=4 \
+  bash run_test.sh levircdplus ChangeGCC_work_dirs/LEVIR+/ChangeGCC-b/last.pth
 ```
 
 For an existing cropped dataset, point `LEVIRCD_ROOT` to its root:

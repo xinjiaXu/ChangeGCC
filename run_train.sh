@@ -19,7 +19,7 @@ fi
 
 case "$1" in
   levircd) dataset="LEVIR"; dataset_root="$levircd_root"; image_a="A"; image_b="B"; label_dir="label"; patch_size=256 ;;
-  levircdplus) dataset="LEVIR+"; dataset_root="$data_root/LEVIR_CD_PLUS/cut_data"; image_a="A"; image_b="B"; label_dir="label" ;;
+  levircdplus) dataset="LEVIR+"; dataset_root="$data_root/LEVIR_CD_PLUS/cut_data"; image_a="A"; image_b="B"; label_dir="label"; patch_size=256 ;;
   cdd) dataset="CDD"; dataset_root="$data_root/CDD"; image_a="A"; image_b="B"; label_dir="OUT" ;;
   whucd) dataset="WHU"; dataset_root="$data_root/WHUCD"; image_a="A"; image_b="B"; label_dir="label" ;;
   sysucd) dataset="SYSU"; dataset_root="$data_root/SYSU_CD"; image_a="time1"; image_b="time2"; label_dir="label" ;;
